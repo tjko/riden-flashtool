@@ -53,7 +53,7 @@ Firmware update complete.
 ## Command Line Arguments
 
 ```
-usage: flash-rd.py [-h] [--speed SPEED] [--address ADDRESS] port firmware
+usage: flash-rd.py [-h] [--speed SPEED] port firmware
 
 Riden RD60xx Firmware Flash Tool
 
