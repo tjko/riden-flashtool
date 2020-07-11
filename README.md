@@ -8,13 +8,13 @@ firmware update program and the power supply module. There is no guarantees that
 works 100% of the time. However it's been successfully used with several Riden RD6006
 modules to update firmware from a Linux computer.
 
-## Requirement
+## Requirements
 
 Script has been developed/tested under Linux (Raspberry Pi), but should work
 on other platforms as long as there is Python 3 and "serial" module installed.
 
 * Python 3
-* serial (pySerial) module
+  * serial (pySerial) module
 
 ## Supported models
 
@@ -69,11 +69,15 @@ optional arguments:
 
 ## Recovering from a failed firmware update
 
-In case unit doesnt boot normally, if firmware update has failed earlier or
-flash memory is corrupt for some reason. It is usually still possible to recover
-assuming bootloader is still intact by forcing unit to boot into bootloader.
+Failed firmware upgrade can lead unit not booting up (or flash memory getting
+corrupted by some other way).
 
-To enter bootloader mode manually:  press and hold "ENTER" button when powering on the unit.
+In case unit doesn't boot normally, it is usually still possible to recover unit
+by re-flashing the firmware.
 
-(unit should display something like "Bootloader V1.09" when its booted up into bootloader mode)
+Recovering firmware:
+1. Boot unit to bootloader mode manually: Press and hold "ENTER" button when powering on the unit.
+2. Run the firmware update again.
+
+
 
