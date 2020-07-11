@@ -38,8 +38,8 @@ def read_reply(serial, count):
 def write_string(serial, s):
     if (verbose_mode):
         print("Write: %d: %s" % (len(s),s))
-    serial.write(s)
-    return
+    r = serial.write(s)
+    return r
 
 def update_firmware(serial, fw):
     write_string(serial, b'upfirm\r\n')
@@ -47,7 +47,7 @@ def update_firmware(serial, fw):
     if (r != b'upredy'):
         print("Failed to initiate flashing: %s" %(r))
         return 1
-    print("Updating firmware...")
+    print("Updating firmware...", end="", flush=True)
     pos = 0
     while (pos < len(firmware)):
         buf = firmware[pos:pos+64]
@@ -58,7 +58,7 @@ def update_firmware(serial, fw):
             return 2
         print(".", end="", flush=True)
         pos += 64
-    print(r)    
+    print(r)
     return 0
 
 
@@ -70,13 +70,13 @@ parser = argparse.ArgumentParser(description='Riden RD60xx Firmware Flash Tool')
 parser.add_argument('port', help='Serial port')
 parser.add_argument('firmware', help='Firmware file')
 parser.add_argument('--speed', type=int, default=115200, help='Serial port speed')
-parser.add_argument('--address', type=int, default=1, help='Modbus address')
+#parser.add_argument('--address', type=int, default=1, help='Modbus address')
 args = parser.parse_args()
 
 
 # open serial connection
 
-print("Serial port: %s" % (args.port))
+print("Serial port: %s (%dbps)" % (args.port, args.speed))
 serial = serial.Serial(port=args.port, baudrate=args.speed, timeout=2)
 
 
@@ -108,14 +108,14 @@ else:
     if (len(res) != 13 or res[0] != 0x01 or res[1] != 0x03 or res[2] != 0x08):
         exit("Invalid response received: %s" % (res))
 
-    print("Found device:")    
+    print("Found device:")
     model = (res[3] << 8 | res[4]);
     print(" Model: RD%d (%d)" % (model/10,model))
     print(" Firmware: v%0.2f" % (res[10]/100))
     if (model not in supported_models):
         exit("Unsupported device!")
 
-    print("Rebooting to boot mode...")
+    print("Rebooting to bootloader mode...")
     # try modbus write to register 0x100 (value 0x1601)...
     write_string(serial, b'\x01\x06\x01\x00\x16\x01\x47\x96')
     res=read_reply(serial, 1)
