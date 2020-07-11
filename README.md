@@ -71,11 +71,15 @@ optional arguments:
 
 ## Recovering from a failed firmware update
 
-In case unit doesnt boot normally, if firmware update has failed earlier or
-flash memory is corrupt for some reason. It is usually still possible to recover
-assuming bootloader is still intact by forcing unit to boot into bootloader.
+Failed firmware upgrade can lead unit not booting up (or flash memory getting
+corrupted by some other way).
 
-To enter bootloader mode manually:  press and hold "ENTER" button when powering on the unit.
+In case unit doesn't boot normally, it is usually still possible to recover unit
+by re-flashing the firmware.
 
-(unit should display something like "Bootloader V1.09" when its booted up into bootloader mode)
+Recovering firmware:
+1. Boot unit to bootloader mode manually: Press and hold "ENTER" button when powering on the unit.
+2. Run the firmware update again.
+
+
 
