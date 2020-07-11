@@ -122,13 +122,15 @@ else:
     if (res != b'\xfc'):
         exit("Failed to reboot device.")
     sleep(3)
-        
-exit("test")    
-res = update_firmware(serial, firmware)
 
+
+# update firmware
+
+res = update_firmware(serial, firmware)
 if (res == 0):
     print("Firmware update complete.")
 else:
     print("Firmware update FAILED!")
+
 
 # eof :-)
