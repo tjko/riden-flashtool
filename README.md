@@ -8,16 +8,22 @@ firmware update program and the power supply module. There is no guarantees that
 works 100% of the time. However it's been successfully used with several Riden RD6006
 modules to update firmware from a Linux computer.
 
-## Supported models
-
-Currently script validated with following models:
-
-Make|Model|Info
----------------
-RIDEN|RD6006|Tested with Bootloader V1.09
+## Requirement
 
 Script has been developed/tested under Linux (Raspberry Pi), but should work
 on other platforms as long as there is Python 3 and "serial" module installed.
+
+* Python 3
+* serial (pySerial) module
+
+## Supported models
+
+Currently script has been validated with following models:
+
+Make|Model|Info
+----|-----|----
+RIDEN|RD6006|Tested with Bootloader V1.09
+
 
 ## Updating Firmware
 
