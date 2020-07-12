@@ -41,7 +41,7 @@ def write_string(serial, s):
     r = serial.write(s)
     return r
 
-def update_firmware(serial, fw):
+def update_firmware(serial, firmware):
     write_string(serial, b'upfirm\r\n')
     r = read_reply(serial, 6)
     if (r != b'upredy'):
@@ -70,7 +70,6 @@ parser = argparse.ArgumentParser(description='Riden RD60xx Firmware Flash Tool')
 parser.add_argument('port', help='Serial port')
 parser.add_argument('firmware', help='Firmware file')
 parser.add_argument('--speed', type=int, default=115200, help='Serial port speed')
-#parser.add_argument('--address', type=int, default=1, help='Modbus address')
 args = parser.parse_args()
 
 
