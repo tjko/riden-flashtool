@@ -70,6 +70,7 @@ parser = argparse.ArgumentParser(description='Riden RD60xx Firmware Flash Tool')
 parser.add_argument('port', help='Serial port')
 parser.add_argument('firmware', help='Firmware file')
 parser.add_argument('--speed', type=int, default=115200, help='Serial port speed')
+parser.add_argument('--bootloader', action='store_true', help='Set unit to booaloader mode only.')
 args = parser.parse_args()
 
 
@@ -90,14 +91,14 @@ print("Firmware size: %d bytes" % (len(firmware)))
 
 
 
-print("Check if device is in bootloader mode...")
+print("Check if device is in bootloader mode...", end="", flush=True)
 write_string(serial, b'queryd\r\n')
 res=read_reply(serial, 4)
 serial.timeout=5;
 if (res == b'boot'):
-    print("In bootloader mode.")
+    print("Yes")
 else:
-    print("Not in bootloader mode.")
+    print("No")
 
     # try modbus query (read registers 0-3)...
     write_string(serial, b'\x01\x03\x00\x00\x00\x04\x44\x09')
@@ -107,12 +108,8 @@ else:
     if (len(res) != 13 or res[0] != 0x01 or res[1] != 0x03 or res[2] != 0x08):
         exit("Invalid response received: %s" % (res))
 
-    print("Found device:")
     model = (res[3] << 8 | res[4]);
-    print(" Model: RD%d (%d)" % (model/10,model))
-    print(" Firmware: v%0.2f" % (res[10]/100))
-    if (model not in supported_models):
-        exit("Unsupported device!")
+    print("Found device (using Modbus): RD%d (%d) v%0.2f" % (model/10,model,res[10]/100))
 
     print("Rebooting to bootloader mode...")
     # try modbus write to register 0x100 (value 0x1601)...
@@ -121,6 +118,33 @@ else:
     if (res != b'\xfc'):
         exit("Failed to reboot device.")
     sleep(3)
+
+
+
+# query device information from bootloader
+
+write_string(serial, b'getinf\r\n')
+res=read_reply(serial,13)
+if (len(res) == 0):
+    exit("No response fro bootloader")
+if (len(res) != 13 or res[0:3] != b'inf'):
+    exit("Invalid response from bootloader: %s" % (res))
+
+sn = (res[6] << 24 | res[5] << 16 | res[4] << 8 | res[3])
+model = (res[8] <<8 | res[7])
+fwver = res[11]/100
+
+print("Device information (from bootloader):")
+print("    Model: RD%d (%d)" % (model/10,model))
+print(" Firmware: v%0.2f" % (fwver))
+print("      S/N: %08d" % (sn))
+
+if (model not in supported_models):
+    exit("Unsupported device!")
+
+if (args.bootloader):
+    print("Unit is now in bootloader mode.")
+    exit()
 
 
 # update firmware
