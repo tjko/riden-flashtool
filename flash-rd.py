@@ -126,7 +126,7 @@ else:
 write_string(serial, b'getinf\r\n')
 res=read_reply(serial,13)
 if (len(res) == 0):
-    exit("No response fro bootloader")
+    exit("No response from bootloader")
 if (len(res) != 13 or res[0:3] != b'inf'):
     exit("Invalid response from bootloader: %s" % (res))
 
@@ -140,7 +140,7 @@ print(" Firmware: v%0.2f" % (fwver))
 print("      S/N: %08d" % (sn))
 
 if (model not in supported_models):
-    exit("Unsupported device!")
+    exit("Unsupported device: %d" % (model))
 
 if (args.bootloader):
     print("Unit is now in bootloader mode.")
