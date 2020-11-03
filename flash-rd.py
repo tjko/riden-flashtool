@@ -23,7 +23,7 @@ import argparse
 import serial
 from time import sleep
 
-supported_models = [ 60062 ]
+supported_models = [ 60062, 60121 ]
 verbose_mode = 0
 
 

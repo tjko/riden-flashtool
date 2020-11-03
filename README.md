@@ -23,6 +23,7 @@ Currently script has been validated with following models:
 Make|Model|Info
 ----|-----|----
 RIDEN|RD6006|Tested with Bootloader V1.09
+RIDEN|RD6012|Tested with Bootloader V1.09
 
 
 ## Updating Firmware
