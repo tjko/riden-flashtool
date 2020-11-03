@@ -1,5 +1,5 @@
 # riden-flashtool
-Riden RD6006 Firmware Flash Tool
+Riden RD6006/RD6012 Firmware Flash Tool
 
 This script allows updating firmware on Riden RD60xx power supply units.
 
@@ -66,18 +66,18 @@ Alternatively, set device manually to bootloader mode first.
 ## Command Line Arguments
 
 ```
-usage: flash-rd.py [-h] [--speed SPEED] [--bootloader] port firmware
+usage: flash-rd.py [-h] [--speed SPEED] port [firmware]
 
 Riden RD60xx Firmware Flash Tool
 
 positional arguments:
-  port               Serial port
-  firmware           Firmware file
+  port           Serial port
+  firmware       Firmware file. If not specified, only reboot to bootloader
+                 mode and print version of Riden device
 
 optional arguments:
-  -h, --help         show this help message and exit
-  --speed SPEED      Serial port speed
-  --bootloader       Set unit to booaloader mode only.
+  -h, --help     show this help message and exit
+  --speed SPEED  Serial port speed
 ```
 
 
