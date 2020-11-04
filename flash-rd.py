@@ -23,7 +23,7 @@ import argparse
 import serial
 from time import sleep
 
-supported_models = [ 60062 ]
+supported_models = [ 60062, 60121 ]
 verbose_mode = 0
 
 
@@ -68,9 +68,8 @@ def update_firmware(serial, firmware):
 
 parser = argparse.ArgumentParser(description='Riden RD60xx Firmware Flash Tool')
 parser.add_argument('port', help='Serial port')
-parser.add_argument('firmware', help='Firmware file')
+parser.add_argument('firmware', nargs='?', help='Firmware file. If not specified, only reboot to bootloader mode and print version of Riden device')
 parser.add_argument('--speed', type=int, default=115200, help='Serial port speed')
-parser.add_argument('--bootloader', action='store_true', help='Set unit to booaloader mode only.')
 args = parser.parse_args()
 
 
@@ -79,17 +78,16 @@ args = parser.parse_args()
 print("Serial port: %s (%dbps)" % (args.port, args.speed))
 serial = serial.Serial(port=args.port, baudrate=args.speed, timeout=2)
 
+if args.firmware:
+    # read firmware file
 
-# read firmware file
-try:
-    f = open(args.firmware, 'rb')
-except:
-    exit("Cannot open file: %s" % (args.firmware))
-firmware = f.read()
-f.close()
-print("Firmware size: %d bytes" % (len(firmware)))
-
-
+    try:
+        f = open(args.firmware, 'rb')
+    except:
+        exit("Cannot open file: %s" % (args.firmware))
+    firmware = f.read()
+    f.close()
+    print("Firmware size: %d bytes" % (len(firmware)))
 
 print("Check if device is in bootloader mode...", end="", flush=True)
 write_string(serial, b'queryd\r\n')
@@ -142,18 +140,14 @@ print("      S/N: %08d" % (sn))
 if (model not in supported_models):
     exit("Unsupported device: %d" % (model))
 
-if (args.bootloader):
-    print("Unit is now in bootloader mode.")
-    exit()
+if args.firmware:
+    # update firmware
 
-
-# update firmware
-
-res = update_firmware(serial, firmware)
-if (res == 0):
-    print("Firmware update complete.")
-else:
-    print("Firmware update FAILED!")
+    res = update_firmware(serial, firmware)
+    if (res == 0):
+        print("Firmware update complete.")
+    else:
+        print("Firmware update FAILED!")
 
 
 # eof :-)
