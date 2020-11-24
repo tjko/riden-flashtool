@@ -1,5 +1,5 @@
 # riden-flashtool
-Riden RD6006/RD6012 Firmware Flash Tool
+Riden RD6006/RD6012/RD6018 Firmware Flash Tool
 
 This script allows updating firmware on Riden RD60xx power supply units.
 
@@ -24,7 +24,7 @@ Make|Model|Info
 ----|-----|----
 RIDEN|RD6006|Tested with Bootloader V1.09
 RIDEN|RD6012|Tested with Bootloader V1.09
-
+RIDEN|RD6018|Tested with Bootloader V1.10
 
 ## Updating Firmware
 
