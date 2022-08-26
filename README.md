@@ -38,7 +38,7 @@ Next, connect power supply module to computer (and note the serial port it gets 
 __NOTE, it is recommended to connect the power supply directly to a computer, as using
 a USB hub can lead to flashing process to fail.__
 
-Update firmware by running: _flash-rd.py <serialport> <filename>_
+Update firmware by running: _flash-rd.py \<serialport\> \<filename\>_
 
 
 
