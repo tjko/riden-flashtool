@@ -35,7 +35,13 @@ to device, so make sure correct firmware image is being used!)
 
 Next, connect power supply module to computer (and note the serial port it gets assigned).
 
-Update firmware by running flash-rd.py <serialport> <filename>.
+__NOTE, it is recommended to connect the power supply directly to a computer, as using
+a USB hub can lead to flashing process to fail.__
+
+Update firmware by running: _flash-rd.py <serialport> <filename>_
+
+
+
 
 For example:
 
