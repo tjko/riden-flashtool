@@ -23,40 +23,42 @@ import argparse
 import serial
 from time import sleep
 
-supported_models = [ 60062, 60121, 60181, 60065, 60125 ]
+supported_models = [60062, 60121, 60181, 60065, 60125]
 verbose_mode = 0
 
 
 def read_reply(serial, count):
-    if (verbose_mode):
-        print("Waiting data...")
+    if verbose_mode:
+        print('Waiting data...')
     r = serial.read(count)
-    if (verbose_mode):
-        print("Read: %d: %s" % (len(r),r))
+    if verbose_mode:
+        print('Read: %d: %s' % (len(r), r))
     return r
 
+
 def write_string(serial, s):
-    if (verbose_mode):
-        print("Write: %d: %s" % (len(s),s))
+    if verbose_mode:
+        print('Write: %d: %s' % (len(s), s))
     r = serial.write(s)
     return r
+
 
 def update_firmware(serial, firmware):
     write_string(serial, b'upfirm\r\n')
     r = read_reply(serial, 6)
-    if (r != b'upredy'):
-        print("Failed to initiate flashing: %s" %(r))
+    if r != b'upredy':
+        print('Failed to initiate flashing: %s' % r)
         return 1
-    print("Updating firmware...", end="", flush=True)
+    print('Updating firmware...', end='', flush=True)
     pos = 0
-    while (pos < len(firmware)):
+    while pos < len(firmware):
         buf = firmware[pos:pos+64]
         write_string(serial, buf)
         r = read_reply(serial, 2)
-        if (r != b'OK'):
-            print("Flash failed: %s" % (r))
+        if r != b'OK':
+            print('Flash failed: %s' % r)
             return 2
-        print(".", end="", flush=True)
+        print('.', end='', flush=True)
         pos += 64
     print(r)
     return 0
@@ -64,90 +66,100 @@ def update_firmware(serial, firmware):
 
 ####################################################################################
 
-# parse command-line arguments
+# Parse command-line arguments
 
 parser = argparse.ArgumentParser(description='Riden RD60xx Firmware Flash Tool')
 parser.add_argument('port', help='Serial port')
-parser.add_argument('firmware', nargs='?', help='Firmware file. If not specified, only reboot to bootloader mode and print version of Riden device')
+parser.add_argument('firmware', nargs='?',
+                    help='Firmware file. If not specified, only reboot to bootloader mode and print version of Riden '
+                         'device')
 parser.add_argument('--speed', type=int, default=115200, help='Serial port speed')
 args = parser.parse_args()
 
 
-# open serial connection
+# Open serial connection
 
-print("Serial port: %s (%dbps)" % (args.port, args.speed))
-serial = serial.Serial(port=args.port, baudrate=args.speed, timeout=2)
+print('Serial port: %s (%dbps)' % (args.port, args.speed))
+try:
+    serial = serial.Serial(port=args.port, baudrate=args.speed, timeout=2)
+except serial.SerialException as err:
+    sys.exit(err)
+
+
+# Read firmware file into memory
 
 if args.firmware:
-    # read firmware file
-
     try:
-        f = open(args.firmware, 'rb')
-    except:
-        exit("Cannot open file: %s" % (args.firmware))
-    firmware = f.read()
-    f.close()
-    print("Firmware size: %d bytes" % (len(firmware)))
-
-print("Check if device is in bootloader mode...", end="", flush=True)
-write_string(serial, b'queryd\r\n')
-res=read_reply(serial, 4)
-serial.timeout=5;
-if (res == b'boot'):
-    print("Yes")
+        with open(args.firmware, 'rb') as file:
+            firmware = file.read()
+    except OSError as err:
+        sys.exit(err)
+    print('Firmware size: %d bytes' % len(firmware))
 else:
-    print("No")
+    firmware = ''
 
-    # try modbus query (read registers 0-3)...
+
+# Put device into bootloader mode, if it's not already in it...
+
+print('Check if device is in bootloader mode...', end='', flush=True)
+write_string(serial, b'queryd\r\n')
+res = read_reply(serial, 4)
+serial.timeout = 5
+if res == b'boot':
+    print('Yes')
+else:
+    print('No')
+
+    # Send modbus command (read registers 0-3)
     write_string(serial, b'\x01\x03\x00\x00\x00\x04\x44\x09')
-    res=read_reply(serial, 13)
-    if (len(res) == 0):
-        exit("No response from device.")
-    if (len(res) != 13 or res[0] != 0x01 or res[1] != 0x03 or res[2] != 0x08):
-        exit("Invalid response received: %s" % (res))
+    res = read_reply(serial, 13)
+    if len(res) == 0:
+        sys.exit('No response from device.')
+    if len(res) != 13 or res[0] != 0x01 or res[1] != 0x03 or res[2] != 0x08:
+        sys.exit('Invalid response received: %s' % res)
 
-    model = (res[3] << 8 | res[4]);
-    print("Found device (using Modbus): RD%d (%d) v%0.2f" % (model/10,model,res[10]/100))
+    model = (res[3] << 8 | res[4])
+    print('Found device (using Modbus): RD%d (%d) v%0.2f' % (model / 10, model, res[10] / 100))
 
-    print("Rebooting to bootloader mode...")
-    # try modbus write to register 0x100 (value 0x1601)...
+    print('Rebooting to bootloader mode...')
+
+    # Send modbus command (write 0x1601 into register 0x100)
     write_string(serial, b'\x01\x06\x01\x00\x16\x01\x47\x96')
-    res=read_reply(serial, 1)
-    if (res != b'\xfc'):
-        exit("Failed to reboot device.")
+    res = read_reply(serial, 1)
+    if res != b'\xfc':
+        sys.exit('Failed to reboot device.')
     sleep(3)
 
 
-
-# query device information from bootloader
+# Query device information from bootloader
 
 write_string(serial, b'getinf\r\n')
-res=read_reply(serial,13)
-if (len(res) == 0):
-    exit("No response from bootloader")
-if (len(res) != 13 or res[0:3] != b'inf'):
-    exit("Invalid response from bootloader: %s" % (res))
+res = read_reply(serial, 13)
+if len(res) == 0:
+    sys.exit('No response from bootloader')
+if len(res) != 13 or res[0:3] != b'inf':
+    sys.exit('Invalid response from bootloader: %s' % res)
 
 sn = (res[6] << 24 | res[5] << 16 | res[4] << 8 | res[3])
-model = (res[8] <<8 | res[7])
-fwver = res[11]/100
+model = (res[8] << 8 | res[7])
+fwver = res[11] / 100
 
-print("Device information (from bootloader):")
-print("    Model: RD%d (%d)" % (model/10,model))
-print(" Firmware: v%0.2f" % (fwver))
-print("      S/N: %08d" % (sn))
+print('Device information (from bootloader):')
+print('    Model: RD%d (%d)' % (model / 10, model))
+print(' Firmware: v%0.2f' % fwver)
+print('      S/N: %08d' % sn)
 
-if (model not in supported_models):
-    exit("Unsupported device: %d" % (model))
+if model not in supported_models:
+    sys.exit('Unsupported device: %d' % model)
 
-if args.firmware:
-    # update firmware
+# Update firmware
 
+if len(firmware) > 0:
     res = update_firmware(serial, firmware)
-    if (res == 0):
-        print("Firmware update complete.")
+    if res == 0:
+        print('Firmware update complete.')
     else:
-        print("Firmware update FAILED!")
+        sys.exit('Firmware update FAILED!')
 
 
 # eof :-)
