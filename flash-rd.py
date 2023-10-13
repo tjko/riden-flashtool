@@ -2,7 +2,7 @@
 #
 # flash-rd.py - Riden RD60xx Firmware Flash Tool
 #
-# Copyright (C) 2020 Timo Kokkonen <tjko@iki.fi>
+# Copyright (C) 2020-2023 Timo Kokkonen <tjko@iki.fi>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -44,14 +44,12 @@ class RidenFirmwareUpdater:
             print('Read: %d: %s' % (len(res), res))
         return res
 
-
     def write_string(self, string):
         """Write block of data to device."""
         if self.verbose_mode:
             print('Write: %d: %s' % (len(string), string))
         res = self.port.write(string)
         return res
-
 
     def update_firmware(self, firmware):
         """Send firmware image to device."""
@@ -95,7 +93,7 @@ class RidenFirmwareUpdater:
                 print('Invalid response received: %s' % res)
                 return 2
 
-            model = (res[3] << 8 | res[4])
+            model = res[3] << 8 | res[4]
             print('Found device (using Modbus): RD%d (%d) v%0.2f' %
                   (model / 10, model, res[10] / 100))
 
@@ -120,8 +118,8 @@ class RidenFirmwareUpdater:
         if len(res) != 13 or res[0:3] != b'inf':
             print('Invalid response from bootloader: %s' % res)
             return(-2, 0, 0)
-        snum = (res[6] << 24 | res[5] << 16 | res[4] << 8 | res[3])
-        model = (res[8] << 8 | res[7])
+        snum = res[6] << 24 | res[5] << 16 | res[4] << 8 | res[3]
+        model = res[8] << 8 | res[7]
         fwver = res[11] / 100
         return(model, fwver, snum)
 
