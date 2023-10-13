@@ -140,7 +140,7 @@ class RidenFirmwareUpdater:
 
 
     def supported_model(self, model):
-        """Check if device model is supported for firmare update."""
+        """Check if device model is supported for firmware update."""
         if model in self.supported_models:
             return True
         return False
