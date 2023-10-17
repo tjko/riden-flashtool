@@ -45,16 +45,16 @@ class RidenFirmwareUpdater:
             print('Waiting data...')
         res = self.port.read(count)
         if self.verbose_mode:
-            print('Read: %d: %s' % (len(res), res))
+            print(f'Read: {len(res)}: {res}')
         return res
 
 
-    def write_data(self, string):
+    def write_data(self, data):
         """Write block of data to device."""
 
         if self.verbose_mode:
-            print('Write: %d: %s' % (len(string), string))
-        res = self.port.write(string)
+            print(f'Write: {len(data)}: {data}')
+        res = self.port.write(data)
         return res
 
 
@@ -65,7 +65,7 @@ class RidenFirmwareUpdater:
         self.write_data(b'upfirm\r\n')
         res = self.read_data(6)
         if res != b'upredy':
-            print('Failed to initiate flashing: %s' % res)
+            print(f'Failed to initiate flashing: {res}')
             return 1
 
         print('Updating firmware...', end='', flush=True)
@@ -75,7 +75,7 @@ class RidenFirmwareUpdater:
             self.write_data(buf)
             res = self.read_data(2)
             if res != b'OK':
-                print('Flash failed: %s' % res)
+                print(f'Flash failed: {res}')
                 return 2
             print('.', end='', flush=True)
             pos += 64
@@ -105,11 +105,11 @@ class RidenFirmwareUpdater:
             print('No response from device.')
             return 1
         if len(res) != 13 or res[0] != 0x01 or res[1] != 0x03 or res[2] != 0x08:
-            print('Invalid response received: %s' % res)
+            print(f'Invalid response received: {res}')
             return 2
         model = res[3] << 8 | res[4]
-        print('Found device (using Modbus): RD%d (%d) v%0.2f' %
-              (model / 10, model, res[10] / 100))
+        fwver = res[10] / 100
+        print(f'Found a device (using Modbus): RD{int(model/10)} ({model}) v{fwver:.2f}')
 
         # Send modbus command (write 0x1601 into register 0x100) to reboot
         print('Rebooting into bootloader mode...')
@@ -133,7 +133,7 @@ class RidenFirmwareUpdater:
             print('No response from bootloader')
             return(-1, 0, 0)
         if len(res) != 13 or res[0:3] != b'inf':
-            print('Invalid response from bootloader: %s' % res)
+            print(f'Invalid response from bootloader: {res}')
             return(-2, 0, 0)
         snum = res[6] << 24 | res[5] << 16 | res[4] << 8 | res[3]
         model = res[8] << 8 | res[7]
@@ -170,7 +170,7 @@ def main():
 
     # Open serial connection
 
-    print('Serial port: %s (%dbps)' % (args.port, args.speed))
+    print(f'Serial port: {args.port} ({args.speed}bps)')
     try:
         port = serial.Serial(port=args.port, baudrate=args.speed, timeout=2)
     except serial.SerialException as err:
@@ -185,7 +185,7 @@ def main():
                 firmware = file.read()
         except OSError as err:
             sys.exit(err)
-        print('Firmware size: %d bytes' % len(firmware))
+        print(f'Firmware image size: {len(firmware)} bytes')
     else:
         firmware = ''
 
@@ -195,7 +195,7 @@ def main():
     psu = RidenFirmwareUpdater(port, verbose=args.verbose)
     res = psu.bootloader_mode()
     if res:
-        sys.exit('Failed to set device in bootloader mode.')
+        sys.exit('Failed to set device into bootloader mode.')
 
 
     # Query device information from bootloader
@@ -204,12 +204,12 @@ def main():
 
     if model >= 0:
         print('Device information (from bootloader):')
-        print('    Model: RD%d (%d)' % (model / 10, model))
-        print(' Firmware: v%0.2f' % fwver)
-        print('      S/N: %08d' % snum)
+        print(f'    Model: RD{int(model / 10)} ({model})')
+        print(f' Firmware: v{fwver:.2f}')
+        print(f'      S/N: {snum:0>8d}')
 
     if not psu.supported_model(model):
-        sys.exit('Unsupported device: %d' % model)
+        sys.exit(f'Unsupported device: {model}')
 
     # Update firmware
 
