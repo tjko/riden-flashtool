@@ -18,6 +18,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+"""Riden PSU Firmware Updater"""
+
 import sys
 import argparse
 from time import sleep
@@ -158,9 +160,11 @@ def main():
     parser.add_argument('port', help='Serial port')
     parser.add_argument('firmware', nargs='?',
                         help='Firmware file. If not specified, only reboot to bootloader'
-                             'mode and print version of the device.')
-    parser.add_argument('--speed', type=int, default=115200, help='Serial port speed')
-    parser.add_argument('--verbose', '-v', action='store_true', help='Enable verbose mode')
+                             ' mode and print version of the device.')
+    parser.add_argument('-v', '--verbose', action='store_true',
+                        help='Enable verbose mode')
+    parser.add_argument('-s', '--speed', type=int, default=115200,
+                        help='Serial port speed (default: 115200)')
     args = parser.parse_args()
 
 
@@ -215,6 +219,7 @@ def main():
             print('Firmware update complete.')
         else:
             sys.exit('Firmware update FAILED!')
+
 
 
 if __name__ == '__main__':
