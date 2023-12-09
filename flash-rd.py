@@ -30,7 +30,7 @@ import serial
 class RidenFirmwareUpdater:
     """Riden RD60xx Power Supply Firmware Updater"""
 
-    supported_models = [60062, 60121, 60181, 60065, 60125]
+    supported_models = [60062, 60065, 60121, 60125, 60181, 60241]
 
 
     def __init__(self, port, verbose=False):
