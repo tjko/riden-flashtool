@@ -29,6 +29,7 @@ RIDEN|RD6012P|Tested with Bootloader V1.14
 RIDEN|RD6018|Tested with Bootloader V1.10
 RIDEN|RD6018W|Tested with Bootloader V1.12
 RIDEN|RD6024|Tested with Bootloader v1.13
+RIDEN|RD6030|Tested with Bootloader v1.15
 RIDEN|RK6006-BT|Tested with Bootloader v1.04
 
 ## Updating Firmware

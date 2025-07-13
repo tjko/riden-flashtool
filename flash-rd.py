@@ -2,7 +2,7 @@
 #
 # flash-rd.py - Riden RD60xx Firmware Flash Tool
 #
-# Copyright (C) 2020-2024 Timo Kokkonen <tjko@iki.fi>
+# Copyright (C) 2020-2025 Timo Kokkonen <tjko@iki.fi>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,7 +30,10 @@ import serial
 class RidenFirmwareUpdater:
     """Riden RD60xx Power Supply Firmware Updater"""
 
-    supported_models = [60062, 60065, 60066, 60121, 60125, 60181, 60241]
+    supported_models = [ 60062, 60065, 60066,
+                         60121, 60125, 60181,
+                         60241,
+                         60301 ]
 
 
     def __init__(self, port, verbose=False):
